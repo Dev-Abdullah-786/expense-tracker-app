@@ -55,3 +55,42 @@ export async function registerUser(req, res) {
     message: "Internal server error",
   });
 }
+
+export async function loginUser(req, res) {
+  const { email, password } = req.body;
+  if (!email || !password) {
+    return res.status(400).json({
+      success: false,
+      message: "Both fields are required",
+    });
+  }
+
+  try {
+    const user = await user.findOne({ email });
+    if (!user) {
+      return res.status(401).json({
+        success: false,
+        message: "Invalid email or password",
+      });
+    }
+
+    const match = await bcrypt.compare(password, user.password);
+    if (!match) {
+      return res.status(401).json({
+        success: false,
+        message: "Invalid email or password",
+      });
+    }
+    const token = createToken(user._id);
+    res.status(200).json({
+      success: true,
+      token,
+      user: { id: user._id, name: user.name, email: user.email },
+    });
+  } catch (err) {}
+  console.error(err);
+  res.status(500).json({
+    success: false,
+    message: "Internal server error",
+  });
+}
