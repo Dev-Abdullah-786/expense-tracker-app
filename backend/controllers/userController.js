@@ -94,3 +94,25 @@ export async function loginUser(req, res) {
     message: "Internal server error",
   });
 }
+
+export async function getCurrentUser(req, res) {
+  try {
+    const user = await User.findById(req.user.id).select("name email");
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+    res.status(200).json({
+      success: true,
+      user,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+}
