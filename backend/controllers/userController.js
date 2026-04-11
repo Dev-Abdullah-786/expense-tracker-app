@@ -142,7 +142,47 @@ export async function updateProfile(params) {
       success: true,
       user,
     });
-  } catch (error) {
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+}
+
+export async function updatePassword(req, res){
+  const {currentPassword, newPassword} = req.body;
+  if(!currentPassword || !newPassword || newPassword.lenght < 8 ){
+     return res.status(400).json({
+        success: false,
+        message: "Password invalid or too short",
+      }); 
+  }
+  try {
+    const user = await User.findByID(req.user.id).select("password");
+    if(!user){
+       return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+        const match = await bcrypt.compare(currentPassword, user.password);
+    if (!match) {
+      return res.status(400).json({
+        success: false,
+        message: "Current Password is incorrect",
+      });
+    }
+
+    user.password = await bcrypt.hash(newPassword, 10);
+    await user.save();
+    res.json({
+      success: true,
+      message: "Password updated successfully"
+    })
+
+  } catch (err) {
     console.error(err);
     res.status(500).json({
       success: false,
