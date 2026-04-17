@@ -33,3 +33,20 @@ export async function addIncome(req, res) {
     });
   }
 }
+
+export async function getAllIncome(req, res) {
+  const userId = req.user._id;
+  try {
+    const income = await incomeModel.find({ userId }).sort({ date: -1 });
+    res.status(200).json({
+      success: true,
+      income,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+}
