@@ -50,3 +50,33 @@ export async function getAllIncome(req, res) {
     });
   }
 }
+
+export async function updateIncome(req, res) {
+  const { id } = req.params;
+  const userId = req.user._id;
+  const { description, amount } = req.body;
+  try {
+    const updateIncome = await incomeModel.findOneAndUpdate(
+      { _id: id, userId },
+      { description, amount },
+      { new: true },
+    );
+    if (!updateIncome) {
+      return res.status(404).json({
+        success: false,
+        message: "Income not found",
+      });
+    }
+    res.status(200).json({
+      success: true,
+      message: "Income updated successfully",
+      data: updateIncome,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+}
