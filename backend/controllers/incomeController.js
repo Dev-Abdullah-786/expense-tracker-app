@@ -1,3 +1,6 @@
+import fs from 'fs';
+import path from 'path';
+import XLSX from "xlsx";
 import incomeModel from "../model/incomeModel.js";
 
 export async function addIncome(req, res) {
@@ -96,6 +99,43 @@ export async function deleteIncome(req, res) {
       success: true,
       message: "Income deleted successfully",
     });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+}
+
+export async function downloadIncomeExcel(req, res) {
+  const userId = req.user._id;
+  try {
+    const income = await incomeModel.find({ userId }).sort({ date: -1 });
+    
+    const plainData = income.map((inc) => ({
+      Description: inc.description,
+      Amount: inc.amount,
+      Category: inc.category,
+      Date: new Date(inc.date).toLocaleDateString(),
+    }));
+    
+    const worksheet = XLSX.utils.json_to_sheet(plainData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Income Records");
+    
+    const fileName = `income_${Date.now()}.xlsx`;
+    const filePath = path.join(process.cwd(), fileName);
+    
+    XLSX.writeFile(workbook, filePath);
+    
+    res.download(filePath, `income_details_${Date.now()}.xlsx`, (err) => {
+      if (err) {
+        console.error("Download error:", err);
+      }
+      fs.unlinkSync(filePath);
+    });
+    
   } catch (err) {
     console.error(err);
     res.status(500).json({
