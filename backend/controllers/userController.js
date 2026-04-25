@@ -1,7 +1,7 @@
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import validator from "validator";
-import User from "../model/userModel.js";
+import UserModel from "../model/userModel.js";
 
 const TOKEN_EXPIRES = "24h";
 const JWT_SECRET = "Jwt_Secret_Token";
@@ -26,7 +26,7 @@ export async function registerUser(req, res) {
     });
   }
 
-  if (password.lenght < 8) {
+  if (password.length < 8) {
     return res.status(400).json({
       success: false,
       message: "Password must be atleast of 8 charcters",
@@ -34,14 +34,14 @@ export async function registerUser(req, res) {
   }
 
   try {
-    if (await User.findOne({ email })) {
+    if (await UserModel.findOne({ email })) {
       return res.status(409).json({
         success: false,
         message: "User already exist",
       });
     }
     const hashed = await bcrypt.hash(password, 10);
-    const user = await User.create({ name, email, password: hashed });
+    const user = await UserModel.create({ name, email, password: hashed });
     const token = createToken(user._id);
     res.status(201).json({
       success: true,
@@ -67,7 +67,7 @@ export async function loginUser(req, res) {
   }
 
   try {
-    const user = await user.findOne({ email });
+    const user = await UserModel.findOne({ email });
     if (!user) {
       return res.status(401).json({
         success: false,
@@ -99,7 +99,7 @@ export async function loginUser(req, res) {
 
 export async function getCurrentUser(req, res) {
   try {
-    const user = await User.findById(req.user.id).select("name email");
+    const user = await UserModel.findById(req.user.id).select("name email");
     if (!user) {
       return res.status(404).json({
         success: false,
@@ -119,7 +119,7 @@ export async function getCurrentUser(req, res) {
   }
 }
 
-export async function updateProfile(params) {
+export async function updateProfile(req, res) {
   const { name, email } = req.body;
   if (!name || !email || !validator.isEmail(email)) {
     return res.status(400).json({
@@ -128,18 +128,18 @@ export async function updateProfile(params) {
     });
   }
   try {
-    const exists = await User.findOne({ emai, _id: { $ne: req.user.id } });
+    const exists = await UserModel.findOne({ email, _id: { $ne: req.user.id } });
     if (exists) {
       return res.status(409).json({
         success: false,
         message: "Email already in use.",
       });
     }
-    const user = await User.findByIdAndUpdate(
+    const user = await UserModel.findByIdAndUpdate(
       req.user.id,
       { name, email },
-      { new: true, runValidators: true, select: "name email" },
-    );
+      { new: true, runValidators: true },
+    ).select("name email");
     res.json({
       success: true,
       user,
@@ -162,7 +162,7 @@ export async function updatePassword(req, res) {
     });
   }
   try {
-    const user = await User.findByID(req.user.id).select("password");
+    const user = await UserModel.findById(req.user.id).select("password");
     if (!user) {
       return res.status(404).json({
         success: false,
