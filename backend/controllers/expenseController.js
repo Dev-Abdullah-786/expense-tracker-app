@@ -33,3 +33,20 @@ export async function addExpense(req, res) {
     });
   }
 }
+
+export async function getAllExpense(req, res) {
+  const userId = req.user._id;
+  try {
+    const expenses = await expenseModel.find({ userId }).sort({ date: -1 });
+    res.status(200).json({
+      success: true,
+      expenses,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+}
