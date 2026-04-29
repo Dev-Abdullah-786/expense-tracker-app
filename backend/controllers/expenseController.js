@@ -80,3 +80,27 @@ export async function updateExpense(req, res) {
     });
   }
 }
+
+export async function deleteExpense(req, res) {
+  const { id } = req.params;
+  const userId = req.user._id;
+  try {
+    const expense = await expenseModel.findOneAndDelete({ _id: id, userId });
+    if (!expense) {
+      return res.status(404).json({
+        success: false,
+        message: "Expense not found",
+      });
+    }
+    res.status(200).json({
+      success: true,
+      message: "Expense deleted successfully",
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+}
