@@ -1,3 +1,4 @@
+import XLSX from "xlsx";
 import expenseModel from "../model/expenseModel.js";
 
 export async function addExpense(req, res) {
@@ -95,6 +96,35 @@ export async function deleteExpense(req, res) {
     res.status(200).json({
       success: true,
       message: "Expense deleted successfully",
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+}
+
+export async function downloadExpenseExcel(req, res) {
+  const userId = req.user._id;
+  try {
+    const expense = await expenseModel.find({ userId }).sort({ date: -1 });
+    const plainData = expense.map((inc) => ({
+      Description: inc.description,
+      Amount: inc.amount,
+      Category: inc.category,
+      Date: new Date(inc.date).toLocaleDateString(),
+    }));
+    const worksheet = XLSX.utils.json_to_sheet(plainData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "expenseModel");
+    XLSX.writeFile(workbook, "expense_details.xlsx");
+    res.download("expense_details.xlsx");
+
+    res.status(200).json({
+      success: true,
+      expense,
     });
   } catch (err) {
     console.error(err);
