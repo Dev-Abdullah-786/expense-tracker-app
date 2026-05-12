@@ -482,12 +482,12 @@ export const navbarStyles = {
     "flex items-center justify-between px-4 py-3 md:px-8 max-w-7xl mx-auto",
 
   // Logo styles
-  logoContainer: "flex items-center gap-0 cursor-pointer",
-  logoImage: "w-15 h-15 rounded-xl overflow-hidden",
+  logoContainer: "flex items-center gap-2 cursor-pointer",
+  logoImage: "w-10 h-10 rounded-xl overflow-hidden flex-shrink-0",
 
   // Text styles
   logoText:
-    "lg:text-3xl md:text-3xl text-2xl text-gray-900 font-[550] lobster-regular",
+    "lg:text-2xl md:text-2xl text-xl text-gray-900 font-semibold",
 
   // User profile styles
   userContainer: "relative",
@@ -725,7 +725,7 @@ export const styles = {
   layout: {
     root: "min-h-screen bg-gradient-to-br from-gray-50 to-gray-100",
     mainContainer: (sidebarCollapsed: boolean) =>
-      `p-4 pt-6 transition-all duration-300 ${sidebarCollapsed ? "lg:ml-20" : "lg:ml-64"}`,
+      `flex-1 p-4 pt-6 min-h-screen transition-all duration-300 ${sidebarCollapsed ? "lg:ml-20" : "lg:ml-64"}`,
   },
 
   // Header Styles
