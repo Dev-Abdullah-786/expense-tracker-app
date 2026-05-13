@@ -12,12 +12,15 @@ axiosInstance.interceptors.request.use((config) => {
   return config;
 });
 
-// Handle 401 — clear token and redirect to login
+// Handle 401 — only redirect when token has expired, not on auth endpoints
 axiosInstance.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
+    const url: string = error.config?.url ?? "";
+    const isAuthEndpoint = url.includes("/user/login") || url.includes("/user/register");
+    if (error.response?.status === 401 && !isAuthEndpoint) {
       localStorage.removeItem("token");
+      localStorage.removeItem("user");
       window.location.href = "/login";
     }
     return Promise.reject(error);
