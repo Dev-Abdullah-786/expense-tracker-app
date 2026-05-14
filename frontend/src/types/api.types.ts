@@ -1,3 +1,5 @@
+import React from 'react';
+
 // ─── Base ────────────────────────────────────────────────────────────────────
 
 export interface ApiResponse<T = undefined> {
@@ -165,4 +167,11 @@ export interface LayoutProps {
   user: User | null;
   onLogout: () => void;
   children?: React.ReactNode;
+}
+
+export interface SidebarProps {
+  user: User | null;
+  isCollapsed: boolean;
+  setIsCollapsed: React.Dispatch<React.SetStateAction<boolean>>;
+  onLogout: () => void;
 }
